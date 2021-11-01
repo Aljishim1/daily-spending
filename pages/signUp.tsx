@@ -1,8 +1,7 @@
-import type { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import {
   Alert,
   Button,
@@ -18,21 +17,23 @@ import {
 import Firebase from "../Firebase";
 import styles from "../styles/Home.module.css";
 
-const Home: NextPage = () => {
-  const router = useRouter();
+const SignUp = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [signInWithEmailAndPassword, user, loading, error] =
-    useSignInWithEmailAndPassword(Firebase.auth());
+  const [passwordOne, setPasswordOne] = useState("");
+  const [passwordTwo, setPasswordTwo] = useState("");
+  const router = useRouter();
+  const [createUserWithEmailAndPassword, user, loading, error] =
+    useCreateUserWithEmailAndPassword(Firebase.auth());
 
   useEffect(() => {
     if (!loading && user?.user) {
-      router.replace("loggedIn");
+      router.push("/loggedIn");
     }
-  }, [user, loading]);
+  }, [loading, user]);
 
   const onSubmit = (event: any) => {
-    signInWithEmailAndPassword(email, password);
+    if (passwordOne === passwordTwo)
+      createUserWithEmailAndPassword(email, passwordOne);
     event.preventDefault();
   };
 
@@ -48,19 +49,14 @@ const Home: NextPage = () => {
 
   return (
     <div className={styles.container}>
-      <Container className="text-center" style={{ padding: "20px 0px" }}>
-        <main className={styles.main}>
+      <main className={styles.main}>
+        <Container className="text-center custom-container">
           <Row>
             <Col>
-              <h2>My Daily Spending</h2>
-            </Col>
-          </Row>
-          <Row style={{ maxWidth: "400px", margin: "auto" }}>
-            <Col>
-              <Form onSubmit={onSubmit}>
+              <Form className="custom-form" onSubmit={onSubmit}>
                 {error && <Alert color="danger">{error.message}</Alert>}
                 <FormGroup row>
-                  <Label for="loginEmail" sm={4}>
+                  <Label for="signUpEmail" sm={4}>
                     Email
                   </Label>
                   <Col sm={8}>
@@ -69,43 +65,58 @@ const Home: NextPage = () => {
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       name="email"
-                      id="loginEmail"
+                      id="signUpEmail"
                       placeholder="Email"
                     />
                   </Col>
                 </FormGroup>
                 <FormGroup row>
-                  <Label for="loginPassword" sm={4}>
+                  <Label for="signUpPassword" sm={4}>
                     Password
                   </Label>
                   <Col sm={8}>
                     <Input
                       type="password"
+                      name="passwordOne"
+                      value={passwordOne}
+                      onChange={(event) => setPasswordOne(event.target.value)}
+                      id="signUpPassword"
+                      placeholder="Password"
+                    />
+                  </Col>
+                </FormGroup>
+                <FormGroup row>
+                  <Label for="signUpPassword2" sm={4}>
+                    Confirm Password
+                  </Label>
+                  <Col sm={8}>
+                    <Input
+                      type="password"
                       name="password"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      id="loginPassword"
+                      value={passwordTwo}
+                      onChange={(event) => setPasswordTwo(event.target.value)}
+                      id="signUpPassword2"
                       placeholder="Password"
                     />
                   </Col>
                 </FormGroup>
                 <FormGroup row>
                   <Col>
-                    <Button>Login</Button>
+                    <Button>Sign Up</Button>
                   </Col>
                 </FormGroup>
                 <FormGroup row>
                   <Col>
-                    No account? <Link href="/signUp">Create one</Link>
+                    Already registered? <Link href="/">Sign In</Link>
                   </Col>
                 </FormGroup>
               </Form>
             </Col>
           </Row>
-        </main>
-      </Container>
+        </Container>
+      </main>
     </div>
   );
 };
 
-export default Home;
+export default SignUp;
